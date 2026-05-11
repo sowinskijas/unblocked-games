@@ -21,12 +21,8 @@ app.get('/uv/service/*', (req, res) => {
     <div class="spinner"></div>
     <p>Setting up proxy, one moment...</p>
     <script>
-      const alreadyRetried = sessionStorage.getItem('uvRetried');
-      if (alreadyRetried) {
-        document.querySelector('p').textContent = 'Proxy unavailable. Go back and try again.';
-        document.querySelector('.spinner').style.display = 'none';
-      } else {
-        sessionStorage.setItem('uvRetried', '1');
+      sessionStorage.removeItem('uvRetried');
+      {
         navigator.serviceWorker.register('/uv/sw.js', { scope: '/uv/service/' })
           .then(() => navigator.serviceWorker.ready)
           .then(() => setTimeout(() => location.reload(), 500))
