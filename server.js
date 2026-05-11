@@ -7,6 +7,9 @@ const app = express();
 const bareServer = createBareServer('/bare/');
 const PORT = process.env.PORT || 3000;
 
+// Keep-alive ping endpoint
+app.get('/ping', (req, res) => res.send('pong'));
+
 // Serve Ultraviolet static files
 app.use(express.static(path.join(__dirname, 'public')));
 
