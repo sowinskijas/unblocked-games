@@ -426,7 +426,9 @@
 
 <script>
   function openGame(id, name, url) {
-    window.open(url, '_blank', 'noopener,noreferrer');
+    if (!url.startsWith('http')) url = 'https://' + url;
+    const proxied = '/uv/service/' + __uv$config.encodeUrl(url);
+    window.open(proxied, '_blank', 'noopener,noreferrer');
   }
 </script>
 
