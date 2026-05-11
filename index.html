@@ -423,27 +423,8 @@
 
 <script>
   function openGame(id, name, url) {
-    document.getElementById('modalTitle').textContent = name;
-    document.getElementById('gameFrame').src = url;
-    document.getElementById('gameModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
+    window.open(url, '_blank', 'noopener,noreferrer');
   }
-
-  function closeGame() {
-    document.getElementById('gameFrame').src = '';
-    document.getElementById('gameModal').classList.remove('active');
-    document.body.style.overflow = '';
-  }
-
-  function goFullscreen() {
-    const frame = document.getElementById('gameFrame');
-    if (frame.requestFullscreen) frame.requestFullscreen();
-    else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
-  }
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeGame();
-  });
 </script>
 
 </body>
