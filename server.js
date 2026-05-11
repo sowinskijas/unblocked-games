@@ -30,7 +30,7 @@ app.get('/uv/service/*', (req, res) => {
         navigator.serviceWorker.register('/uv/sw.js', { scope: '/uv/service/' })
           .then(() => navigator.serviceWorker.ready)
           .then(() => setTimeout(() => location.reload(), 500))
-          .catch(() => { document.querySelector('p').textContent = 'Proxy failed. Go back and try again.'; });
+          .catch(err => { document.querySelector('p').textContent = 'Error: ' + err.message; });
       }
     </script>
   </body></html>`);
