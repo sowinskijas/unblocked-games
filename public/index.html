@@ -427,19 +427,19 @@
 <script>
   function openGame(id, name, url) {
     if (!url.startsWith('http')) url = 'https://' + url;
-    try {
-      if (typeof __uv$config !== 'undefined' && __uv$config.encodeUrl) {
+
+    // Show loading overlay while SW activates
+    document.getElementById('loadingOverlay').style.display = 'flex';
+
+    navigator.serviceWorker.ready.then(() => {
+      // Give SW a moment to fully take control
+      setTimeout(() => {
         location.href = '/uv/service/' + __uv$config.encodeUrl(url);
-      } else {
-        // UV not loaded yet — wait for SW then retry
-        navigator.serviceWorker.ready.then(() => {
-          location.href = '/uv/service/' + __uv$config.encodeUrl(url);
-        }).catch(() => { location.href = url; });
-      }
-    } catch(e) {
-      console.error('Proxy error:', e);
-      location.href = url;
-    }
+      }, 300);
+    }).catch(() => {
+      document.getElementById('loadingOverlay').style.display = 'none';
+      alert('Proxy not available. Try refreshing the page once, then click Play again.');
+    });
   }
 </script>
 
