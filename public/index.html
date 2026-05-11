@@ -427,8 +427,19 @@
 <script>
   function openGame(id, name, url) {
     if (!url.startsWith('http')) url = 'https://' + url;
-    const proxied = '/uv/service/' + __uv$config.encodeUrl(url);
-    window.open(proxied, '_blank', 'noopener,noreferrer');
+    try {
+      if (typeof __uv$config !== 'undefined' && __uv$config.encodeUrl) {
+        location.href = '/uv/service/' + __uv$config.encodeUrl(url);
+      } else {
+        // UV not loaded yet — wait for SW then retry
+        navigator.serviceWorker.ready.then(() => {
+          location.href = '/uv/service/' + __uv$config.encodeUrl(url);
+        }).catch(() => { location.href = url; });
+      }
+    } catch(e) {
+      console.error('Proxy error:', e);
+      location.href = url;
+    }
   }
 </script>
 
