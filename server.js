@@ -1,41 +1,29 @@
 const express = require('express');
-const { createProxyMiddleware } = require('http-proxy-middleware');
+const { createBareServer } = require('@tomphttp/bare-server-node');
 const path = require('path');
+const http = require('http');
 
 const app = express();
+const bareServer = createBareServer('/bare/');
 const PORT = process.env.PORT || 3000;
 
-// Serve static files (the games site)
+// Serve Ultraviolet static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Proxy /veck/* -> https://veck.io/*
-app.use('/veck', createProxyMiddleware({
-  target: 'https://veck.io',
-  changeOrigin: true,
-  pathRewrite: { '^/veck': '' },
-  secure: false,
-  on: {
-    proxyRes(proxyRes) {
-      // Remove headers that block embedding
-      delete proxyRes.headers['x-frame-options'];
-      delete proxyRes.headers['content-security-policy'];
-      delete proxyRes.headers['content-security-policy-report-only'];
-    }
+const server = http.createServer((req, res) => {
+  if (bareServer.shouldRoute(req)) {
+    bareServer.routeRequest(req, res);
+  } else {
+    app(req, res);
   }
-}));
+});
 
-// Proxy /veck-files/* -> https://files.veck.io/*
-app.use('/veck-files', createProxyMiddleware({
-  target: 'https://files.veck.io',
-  changeOrigin: true,
-  pathRewrite: { '^/veck-files': '' },
-  secure: false,
-  on: {
-    proxyRes(proxyRes) {
-      delete proxyRes.headers['x-frame-options'];
-      delete proxyRes.headers['content-security-policy'];
-    }
+server.on('upgrade', (req, socket, head) => {
+  if (bareServer.shouldRoute(req)) {
+    bareServer.routeUpgrade(req, socket, head);
+  } else {
+    socket.destroy();
   }
-}));
+});
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
