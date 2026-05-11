@@ -434,19 +434,7 @@
 <script>
   function openGame(id, name, url) {
     if (!url.startsWith('http')) url = 'https://' + url;
-
-    // Show loading overlay while SW activates
-    document.getElementById('loadingOverlay').style.display = 'flex';
-
-    navigator.serviceWorker.ready.then(() => {
-      // Give SW a moment to fully take control
-      setTimeout(() => {
-        location.href = '/uv/service/' + __uv$config.encodeUrl(url);
-      }, 300);
-    }).catch(() => {
-      document.getElementById('loadingOverlay').style.display = 'none';
-      alert('Proxy not available. Try refreshing the page once, then click Play again.');
-    });
+    location.href = '/uv/service/' + __uv$config.encodeUrl(url);
   }
 </script>
 
