@@ -1,5 +1,5 @@
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/uv/uv.sw.js', { scope: '/uv/service/' })
+  navigator.serviceWorker.register('/uv/sw.js', { scope: '/uv/service/' })
     .then(reg => {
       console.log('UV SW registered');
       // If there's a new SW waiting, activate it immediately
