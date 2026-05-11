@@ -10,9 +10,8 @@ const PORT = process.env.PORT || 3000;
 // Keep-alive ping endpoint
 app.get('/ping', (req, res) => res.send('pong'));
 
-// Fallback for /uv/service/* — SW not active yet, show loading page that retries
+// Fallback for /uv/service/* — SW not active yet, register SW and reload once
 app.get('/uv/service/*', (req, res) => {
-  const encoded = req.path.replace('/uv/service/', '');
   res.send(`<!DOCTYPE html><html><head>
     <title>Loading proxy...</title>
     <style>body{background:#0d0d0d;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;gap:16px;margin:0}
@@ -22,21 +21,17 @@ app.get('/uv/service/*', (req, res) => {
     <div class="spinner"></div>
     <p>Setting up proxy, one moment...</p>
     <script>
-      // Wait for service worker to activate then reload
-      if ('serviceWorker' in navigator) {
+      const alreadyRetried = sessionStorage.getItem('uvRetried');
+      if (alreadyRetried) {
+        document.querySelector('p').textContent = 'Proxy unavailable. Go back and try again.';
+        document.querySelector('.spinner').style.display = 'none';
+      } else {
+        sessionStorage.setItem('uvRetried', '1');
         navigator.serviceWorker.register('/uv/sw.js', { scope: '/uv/service/' })
-          .then(reg => {
-            function activate() { location.reload(); }
-            if (reg.active) { activate(); return; }
-            const sw = reg.installing || reg.waiting;
-            if (sw) sw.addEventListener('statechange', e => { if (e.target.state === 'activated') activate(); });
-            else reg.addEventListener('updatefound', () => {
-              reg.installing.addEventListener('statechange', e => { if (e.target.state === 'activated') activate(); });
-            });
-          });
+          .then(() => navigator.serviceWorker.ready)
+          .then(() => setTimeout(() => location.reload(), 500))
+          .catch(() => { document.querySelector('p').textContent = 'Proxy failed. Go back and try again.'; });
       }
-      // Hard fallback: reload after 4 seconds regardless
-      setTimeout(() => location.reload(), 4000);
     </script>
   </body></html>`);
 });
